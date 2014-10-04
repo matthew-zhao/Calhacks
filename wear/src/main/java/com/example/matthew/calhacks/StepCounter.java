@@ -97,6 +97,7 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
     }
 
     public void invokeFitnessAPIs() {
+        /**
         // 1. Invoke the Recording API with:
         // - The Google API client object
         // - The data type to subscribe to
@@ -111,16 +112,39 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
         } else {
             System.out.println("There was a problem subscribing.");
         }
+        */
 
-        int steps = st.describeContents();
-        if (steps < 100)
-        {
-            //sending data to phone that says that the person has not been active enough
-            PutDataMapRequest dataMap = PutDataMapRequest.create("/steps");
-            dataMap.getDataMap().putInt(STEPS_KEY, steps++);
-            PutDataRequest request = dataMap.asPutDataRequest();
-            PendingResult<DataApi.DataItemResult> pendingResultSend = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-        }
+        // 1. Specify what data sources to return
+        DataSourcesRequest req = new DataSourcesRequest.Builder()
+                .setDataSourceTypes(DataSource.TYPE_RAW)
+                .setDataTypes(DataTypes.STEP_COUNT_DELTA)
+                .build();
+
+        // 2. Invoke the Sensors API with:
+        // - The Google API client object
+        // - The data sources request object
+        PendingResult<DataSourcesResult> pendingResult =
+                Fitness.SensorsApi.findDataSources(client, req);
+
+        // 3. Obtain the list of data sources asynchronously
+        pendingResult.setResultCallback(new ResultCallback<DataSourcesResult>() {
+            @Override
+            public void onResult(DataSourcesResult dataSourcesResult) {
+                for (DataSource ds : dataSourcesResult.getDataSources()) {
+                    String dsName = ds.getName();
+                    Device device = ds.getDevice();
+                    int steps = 0;
+                    if (device.describeContents() < 100)
+                    {
+                        //sending data to phone that says that the person has not been active enough
+                        PutDataMapRequest dataMap = PutDataMapRequest.create("/steps");
+                        dataMap.getDataMap().putInt(STEPS_KEY, steps++);
+                        PutDataRequest request = dataMap.asPutDataRequest();
+                        PendingResult<DataApi.DataItemResult> pendingResultSend = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
+                    }
+                }
+            }
+        });
     }
 
     @Override
