@@ -24,7 +24,7 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
 
     private TextView mTextView;
     private GoogleApiClient mClient = null;
-    public static final int REQUEST_OAUTH = 0000; //possibly 0010? or 1000?
+    public static final int REQUEST_OAUTH = 1; //possibly 0010? or 1000?
     public static final String STEPS_KEY = "steps"; //change later
     @Override
     protected void onStart() {
@@ -97,22 +97,48 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
     }
 
     public void invokeFitnessAPIs() {
-        /**
+
         // 1. Invoke the Recording API with:
         // - The Google API client object
         // - The data type to subscribe to
-        PendingResult<Status> pendingResult =
-                Fitness.RecordingApi.subscribe(mClient, DataTypes.STEP_COUNT_DELTA);
+        //PendingResult<Status> pendingResultOverTime =
+        //       Fitness.RecordingApi.subscribe(mClient, DataTypes.STEP_COUNT_CUMULATIVE); //returns a cumulative total of steps
 
+        new Thread() {
+            public void run() {
+                ListSubscriptionResult subResults = getSubscriptionList().await();
+                boolean activitySubActive = false;
+                for (Subscription sc : subResults.getSubscriptions()) {
+                    if (sc.getDataType().equals(DataTypes.STEP_COUNT_CUMULATIVE)) {
+                        activitySubActive = true;
+                        break;
+                    }
+                }
+
+                if (activitySubActive) {
+                    System.out.println("Exisiting subscription for activity detection detected.");
+                    return;
+                }
+                PendingResult<Status> pendingResultOverTime =
+                    Fitness.RecordingApi.subscribe(mClient, DataTypes.STEP_COUNT_CUMULATIVE);
+                Status st = pendingResultOverTime.await();
+                if (st.isSuccess()) {
+                    System.out.println("Successfully subscribed!");
+                } else {
+                    System.out.println("There was a problem subscribing.");
+                }
+            }
+        }.start();
         // 2. Retrieve the result synchronously
         // (For the subscribe method, this call returns immediately)
-        Status st = pendingResult.await();
+        /**Status st = pendingResultOverTime.await();
         if (st.isSuccess()) {
             System.out.println("Successfully subscribed!");
         } else {
             System.out.println("There was a problem subscribing.");
-        }
-        */
+        }**/
+
+        //Charles: when STEP_COUNT_CUMULATIVE reaches certain levels, you want to give user congratulations notifications
 
         // 1. Specify what data sources to return
         DataSourcesRequest req = new DataSourcesRequest.Builder()
@@ -124,7 +150,7 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
         // - The Google API client object
         // - The data sources request object
         PendingResult<DataSourcesResult> pendingResult =
-                Fitness.SensorsApi.findDataSources(client, req);
+                Fitness.SensorsApi.findDataSources(mClient, req);
 
         // 3. Obtain the list of data sources asynchronously
         pendingResult.setResultCallback(new ResultCallback<DataSourcesResult>() {
@@ -134,14 +160,14 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
                     String dsName = ds.getName();
                     Device device = ds.getDevice();
                     int steps = 0;
-                    if (device.describeContents() < 100)
-                    {
+                    //if (device.describeContents() < 100)
+                    //{
                         //sending data to phone that says that the person has not been active enough
                         PutDataMapRequest dataMap = PutDataMapRequest.create("/steps");
                         dataMap.getDataMap().putInt(STEPS_KEY, steps++);
                         PutDataRequest request = dataMap.asPutDataRequest();
-                        PendingResult<DataApi.DataItemResult> pendingResultSend = Wearable.DataApi.putDataItem(mGoogleApiClient, request);
-                    }
+                        PendingResult<DataApi.DataItemResult> pendingResultSend = Wearable.DataApi.putDataItem(mClient, request);
+                    //}
                 }
             }
         });

@@ -19,6 +19,7 @@ import com.google.android.gms.wearable.Wearable;
 
 import android.support.v7.app.ActionBarActivity;
 
+import java.util.concurrent.TimeUnit;
 
 
 public class Calhacks extends ActionBarActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -114,7 +115,7 @@ public class Calhacks extends ActionBarActivity implements GoogleApiClient.Conne
             // 2. Build a sensor registration request object
             SensorRequest req = new SensorRequest.Builder()
                     .setDataType(DataTypes.STEP_COUNT_DELTA)
-                    .setDataSource(dataSource) // optional
+                    //.setDataSource(dataSource) // optional
                     .setSamplingRate(10, TimeUnit.SECONDS)
                     .build();
 
@@ -123,7 +124,7 @@ public class Calhacks extends ActionBarActivity implements GoogleApiClient.Conne
             // - The sensor registration request object
             // - The listener object
             PendingResult<Status> regResult =
-                    Fitness.SensorsApi.register(client, req, listener);
+                    Fitness.SensorsApi.register(mClient, req, listener);
 
             // 4. Check the result asynchronously
             regResult.setResultCallback(new ResultCallback<Status>() {
