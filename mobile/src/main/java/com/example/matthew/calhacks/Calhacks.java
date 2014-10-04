@@ -2,6 +2,7 @@ package com.example.matthew.calhacks;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.renderscript.Element;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -33,4 +34,13 @@ public class Calhacks extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
+    /**@Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+        for (DataEvent event : dataEvents) {
+            if (event.getType() == Element.DataType.FLOAT_32){
+                System.out.println("DataItem deleted:")
+            }
+        }
+    }**/
 }
