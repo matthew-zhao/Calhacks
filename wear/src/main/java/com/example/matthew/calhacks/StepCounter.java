@@ -12,7 +12,8 @@ public class StepCounter extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_step_counter);
+        //setContentView(R.layout.activity_step_counter);
+        setContentView(R.layout.notification_activity);
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.watch_view_stub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
@@ -21,4 +22,5 @@ public class StepCounter extends Activity {
             }
         });
     }
+
 }
