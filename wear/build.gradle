@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'android'
+//apply plugin: 'android'
 
 android {
     compileSdkVersion 20
@@ -19,6 +19,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    dexOptions {
+        preDexLibraries = false
+    }
 }
 
 dependencies {
@@ -28,5 +31,6 @@ dependencies {
     compile 'com.google.android.gms:play-services:5.2.08'
     //compile 'com.google.android.gms:play-services-wearable:5.0.77'
     compile 'com.android.support:appcompat-v7:20.0.0'
-    compile 'com.android.support:support-v4:20.0.0'
+    //compile 'com.android.support.support-v13:+'
+    //compile 'com.android.support:support-v4:20.0.0'
 }

@@ -20,6 +20,9 @@ android {
     }
     productFlavors {
     }
+    dexOptions {
+        preDexLibraries = false
+    }
 }
 
 dependencies {
@@ -28,5 +31,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:+'
     compile 'com.google.android.gms:play-services:5.2.08'
     compile 'com.android.support:appcompat-v7:20.0.0'
-    compile 'com.android.support:support-v4:20.0.0'
+    //compile 'com.android.support.support-v13:+'
+    //compile 'com.android.support:support-v4:20.0.0'
 }
