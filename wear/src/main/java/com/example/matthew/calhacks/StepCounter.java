@@ -19,6 +19,8 @@ import com.google.android.gms.wearable.DataApi;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.fitness.ListSubscriptionsResult;
+import com.google.android.gms.fitness.Subscription;
 
 public class StepCounter extends ActionBarActivity implements ConnectionCallbacks, OnConnectionFailedListener{
 
@@ -96,6 +98,14 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
         invokeFitnessAPIs();
     }
 
+    // Since there are multiple things you can do with a list of subscriptions (dump to log, mine
+    // for data types, unsubscribe from everything) it's easiest to abstract out the part that
+    // wants the list, and leave it to the calling method to decide what to do with the result.
+    private PendingResult<ListSubscriptionsResult> getSubscriptionsList() {
+        // Invoke a Subscriptions list request with the Recording API
+        return Fitness.RecordingApi.listSubscriptions(mClient, DataTypes.ACTIVITY_SAMPLE);
+    }
+
     public void invokeFitnessAPIs() {
 
         // 1. Invoke the Recording API with:
@@ -106,7 +116,7 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
 
         new Thread() {
             public void run() {
-                ListSubscriptionResult subResults = getSubscriptionList().await();
+                ListSubscriptionsResult subResults = getSubscriptionsList().await();
                 boolean activitySubActive = false;
                 for (Subscription sc : subResults.getSubscriptions()) {
                     if (sc.getDataType().equals(DataTypes.STEP_COUNT_CUMULATIVE)) {
@@ -116,7 +126,7 @@ public class StepCounter extends ActionBarActivity implements ConnectionCallback
                 }
 
                 if (activitySubActive) {
-                    System.out.println("Exisiting subscription for activity detection detected.");
+                    System.out.println("Existing subscription for activity detection detected.");
                     return;
                 }
                 PendingResult<Status> pendingResultOverTime =
